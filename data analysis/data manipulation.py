@@ -4,6 +4,17 @@ import click
 import os
 from pandas.api.types import is_numeric_dtype
 
+NAME_MAP = {'clean_meta_data': 'meta',
+            'genres_data': 'genres',
+            'movie_genres_relation': 'movieGenresRelation',
+            'movie_production_companies_relation': 'movieProductionCompanies',
+            'movie_production_countries_relation': 'movieProductionCountries',
+            'movie_spoken_languages_relation': 'movieSpokenLanguages',
+            'production_companies_data': 'productionCompanies',
+            'production_countries_data': 'productionCountries',
+            'spoken_languages_data': 'spokenLanguages'}
+
+
 def _convert_str_to_dataframe(string, movie_id, prefix, id_name, value_name):
     """
     Convert a string representation of an array of json objects into a data frame
@@ -59,6 +70,7 @@ def _reorganize_many_to_many_column(data, col_name, movie_id_col, prefix, id_nam
     relationship_data = concat_data[['movie_id', prefix + id_name]]
     return concat_data_summary, relationship_data
 
+
 def _reorganize_many_to_one_column(data, col_name, prefix):
     """
     helper function to transform the each column of json objects into a data frame
@@ -76,6 +88,7 @@ def _reorganize_many_to_one_column(data, col_name, prefix):
     data = pd.DataFrame(lst_of_obs)
     data.columns = [prefix + name for name in data.columns]
     return data
+
 
 def reorganize_meta_data(meta_data):
     """
@@ -100,7 +113,7 @@ def reorganize_meta_data(meta_data):
     # deal with belongs_to_collection column, which stores json objects instead of json arrays
     data = _reorganize_many_to_one_column(meta_data, 'belongs_to_collection', 'collection_')
     # remove columns of json arrays and json objects
-    clean_meta_data = pd.concat([meta_data, data], axis = 1).drop(columns = ['genres', 'production_companies', \
+    clean_meta_data = pd.concat([meta_data, data], axis=1).drop(columns=['genres', 'production_companies', \
                                                                                    'production_countries', 'spoken_languages',\
                                                                                   'belongs_to_collection'] )
     output_dict['clean_meta_data'] = clean_meta_data
@@ -127,6 +140,7 @@ def main(raw_data_path, output_path):
         read_file = r'{}\{}'.format(raw_data_path, all_raw_data_files[i])
         raw_data = pd.read_csv(read_file)
         if data_names[i] == 'movies_metadata':
+            raw_data = raw_data.groupby('id').first().reset_index()
             output_data_sets = reorganize_meta_data(raw_data)
             for key, value in output_data_sets.items():
                 clean_data_dict[key] = value
@@ -138,7 +152,7 @@ def main(raw_data_path, output_path):
         else:
             clean_data_dict[data_names[i]] = raw_data
     for key, value in output_data_sets.items():
-        save_file = r'{}\{}'.format(output_path, key + '.csv')
+        save_file = r'{}\{}'.format(output_path, NAME_MAP[key] + '.csv')
         value.to_csv(save_file, index=False)
 
 if __name__ == '__main__':
