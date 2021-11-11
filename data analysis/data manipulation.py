@@ -15,7 +15,7 @@ NAME_MAP = {'clean_meta_data': 'meta',
             'spoken_languages_data': 'spokenLanguages'}
 
 
-def _convert_str_to_dataframe(string, movie_id, prefix, id_name, value_name):
+def _convert_str_to_dict_array(string, movie_id):
     """
     Convert a string representation of an array of json objects into a data frame
 
@@ -24,23 +24,22 @@ def _convert_str_to_dataframe(string, movie_id, prefix, id_name, value_name):
         movie_id: movie_id that is at the same row as the string
         prefix: prefix added to the column names.
     Returns:
-        a dataframe representation of the json array
+        an array of dictionary
     """
     if pd.notnull(string):
         lst = eval(string)
         # if the string representation is not a list
         # treat it as an empty list
         if type(lst) != list:
-            lst = [{id_name: np.nan, value_name: np.nan}]
+            lst = [{}]
     else:
-        lst = [{id_name: np.nan, value_name: np.nan}]
-    frame = pd.DataFrame(lst)
-    frame.columns = [prefix + c for c in frame.columns]
-    frame['movie_id'] = movie_id
-    return frame
+        lst = [{}]
+    for e in lst:
+        e['movie_id'] = movie_id
+    return lst
 
 
-def _reorganize_many_to_many_column(data, col_name, movie_id_col, prefix, id_name,  value_name):
+def _reorganize_many_to_many_column(data, col_name, movie_id_col, prefix, id_name):
     """
     helper function to create a entity data set and a relationship data set based on
     the column that contains array of json object
@@ -52,21 +51,23 @@ def _reorganize_many_to_many_column(data, col_name, movie_id_col, prefix, id_nam
         prefix: prefix added to the column names of the entity data set and and the
                 column names of the relationship data set(prefix will not be added to movie_id column)
         id_name: name of the id column in the json object
-        value_name: name of the value column in the json object
     Returns:
         an entity data set and a relationship dataset
     """
     data_to_stack = []
     for idx, row in data.iterrows():
         json_array_str = row[col_name]
-        frame = _convert_str_to_dataframe(json_array_str, row[movie_id_col], prefix, id_name, value_name)
-        data_to_stack.append(frame)
+        lst = _convert_str_to_dict_array(json_array_str, row[movie_id_col])
+        data_to_stack += lst
 
-    concat_data = pd.concat(data_to_stack, axis=0)
+    concat_data = pd.DataFrame(data_to_stack)
+    col_names = [prefix + name if name != 'movie_id' else name for name in concat_data.columns]
+    concat_data.columns = col_names
     if is_numeric_dtype(concat_data[prefix + id_name]):
         concat_data[prefix + id_name] = concat_data[prefix + id_name].astype('Int64')
-    concat_data_summary = concat_data.groupby([prefix + id_name, prefix + value_name]).size().reset_index()
-    concat_data_summary = concat_data_summary[[prefix + id_name, prefix + value_name]]
+    # remove missing values to make sure primary key has no nulls
+    concat_data = concat_data.loc[pd.notnull(concat_data[prefix + id_name])]
+    concat_data_summary = concat_data.groupby([prefix + id_name]).first().reset_index().drop(columns='movie_id')
     relationship_data = concat_data[['movie_id', prefix + id_name]]
     return concat_data_summary, relationship_data
 
@@ -105,9 +106,9 @@ def reorganize_meta_data(meta_data):
             id_name = 'iso_3166_1'
         else:
             id_name = 'iso_639_1'
-        value_name = 'name'
+            id_name = 'iso_639_1'
         summary_data, relationship = _reorganize_many_to_many_column(meta_data, col, 'id',
-                                                                     col + '_', id_name, value_name)
+                                                                     col + '_', id_name)
         output_dict[col + '_data'] = summary_data
         output_dict['movie_' + col + '_relation'] = relationship
     # deal with belongs_to_collection column, which stores json objects instead of json arrays
@@ -138,22 +139,39 @@ def main(raw_data_path, output_path):
     clean_data_dict = dict()
     for i in range(len(all_raw_data_files)):
         read_file = r'{}\{}'.format(raw_data_path, all_raw_data_files[i])
-        raw_data = pd.read_csv(read_file)
         if data_names[i] == 'movies_metadata':
+            print('Processing movies_metadata')
+            raw_data = pd.read_csv(read_file)
             raw_data = raw_data.groupby('id').first().reset_index()
             output_data_sets = reorganize_meta_data(raw_data)
             for key, value in output_data_sets.items():
                 clean_data_dict[key] = value
-        elif data_names[i] == 'keyword':
-            output_data_sets = _reorganize_many_to_many_column(raw_data, 'keywords', 'id',
-                                                               'keyword_', 'id', 'name')
-            for key, value in output_data_sets.items():
-                clean_data_dict[key] = value
-        else:
-            clean_data_dict[data_names[i]] = raw_data
-    for key, value in output_data_sets.items():
-        save_file = r'{}\{}'.format(output_path, NAME_MAP[key] + '.csv')
+            print('Process completed')
+        elif data_names[i] == 'keywords':
+            print('Processing keyword')
+            raw_data = pd.read_csv(read_file)
+            keywords, movie_keywords = _reorganize_many_to_many_column(raw_data, 'keywords', 'id',
+                                                               'keyword_', 'id')
+            clean_data_dict['keywords'] = keywords
+            clean_data_dict['movieKeywords'] = movie_keywords
+            print('Process completed')
+        elif data_names[i] == 'credits':
+            print('Processing credits')
+            raw_data = pd.read_csv(read_file)
+            cast, movie_cast = _reorganize_many_to_many_column(raw_data, 'cast', 'id', '', 'cast_id')
+            crew, movie_crew = _reorganize_many_to_many_column(raw_data, 'crew', 'id', '', 'credit_id')
+            clean_data_dict['crew'] = crew
+            clean_data_dict['movieCrew'] = movie_crew
+            clean_data_dict['cast'] = cast
+            clean_data_dict['movieCast'] = movie_cast
+            print('Process completed')
+    print('saving clean data')
+    for key, value in clean_data_dict.items():
+        file_name = NAME_MAP.get(key)
+        if file_name is None:
+            file_name = key
+        save_file = r'{}\{}'.format(output_path, file_name + '.csv')
         value.to_csv(save_file, index=False)
-
+    print('data cleaning completed')
 if __name__ == '__main__':
     main()
