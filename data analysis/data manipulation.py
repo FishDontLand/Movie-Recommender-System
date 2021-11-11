@@ -116,6 +116,14 @@ def reorganize_meta_data(meta_data):
     clean_meta_data = pd.concat([meta_data, data], axis=1).drop(columns=['genres', 'production_companies', \
                                                                                    'production_countries', 'spoken_languages',\
                                                                                   'belongs_to_collection'] )
+    imdb_id = []
+    for e in clean_meta_data['imdb_id'].values:
+        try:
+            numeric_value = int(e.split('tt')[1])
+        except:
+            numeric_value = np.nan
+        imdb_id.append(numeric_value)
+    clean_meta_data['imdb_id'] = imdb_id
     output_dict['clean_meta_data'] = clean_meta_data
     return output_dict
 
