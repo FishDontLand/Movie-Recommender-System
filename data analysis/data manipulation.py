@@ -68,7 +68,7 @@ def _reorganize_many_to_many_column(data, col_name, movie_id_col, prefix, id_nam
     # remove missing values to make sure primary key has no nulls
     concat_data = concat_data.loc[pd.notnull(concat_data[prefix + id_name])]
     concat_data_summary = concat_data.groupby([prefix + id_name]).first().reset_index().drop(columns='movie_id')
-    relationship_data = concat_data[['movie_id', prefix + id_name]]
+    relationship_data = concat_data.groupby(['movie_id', prefix + id_name]).size().reset_index()[['movie_id', prefix + id_name]]
     return concat_data_summary, relationship_data
 
 
