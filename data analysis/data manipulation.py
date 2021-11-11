@@ -106,7 +106,6 @@ def reorganize_meta_data(meta_data):
             id_name = 'iso_3166_1'
         else:
             id_name = 'iso_639_1'
-            id_name = 'iso_639_1'
         summary_data, relationship = _reorganize_many_to_many_column(meta_data, col, 'id',
                                                                      col + '_', id_name)
         output_dict[col + '_data'] = summary_data
