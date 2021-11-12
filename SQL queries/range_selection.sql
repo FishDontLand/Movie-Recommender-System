@@ -19,9 +19,6 @@ SELECT DISTINCT m.original_title AS MovieName,
                 sl.spoken_languages_name AS Language,
                 year(m.release_date) AS ReleaseYear,
                 m.release_date AS ReleaseDate,
-                m.revenue AS Revenue,
-                m.budget AS Budget,
-                m.revenue-m.budget AS Profit,
                 m.vote_average AS Rate
 FROM meta AS m LEFT JOIN spokenLanguages AS sl ON m.original_language=sl.spoken_languages_abbr
                LEFT JOIN movieGenres AS mg ON m.id=mg.id
