@@ -1,16 +1,18 @@
 USE test;
 
-WITH movie_info AS (SELECT A.movie_id, B.title, B.release_date, B.vote_average, B.imdb_id
+WITH movie_info AS (
+SELECT C.movie_id, D.title, D.release_date, D.vote_average, D.imdb_id
 FROM
 (SELECT DISTINCT movie_id
-FROM movieKeywords
-WHERE movie_id IN (SELECT DISTINCT movie_id
-                    FROM
-                    movieGenresRelation
-                    WHERE genres_id IN (SELECT DISTINCT genres_id
-                                        FROM genres
-                                       WHERE genres_name = 'Adventure')) LIMIT 50) A LEFT JOIN meta B
-ON A.movie_id = B.id)
+FROM
+(SELECT DISTINCT genres_id
+FROM genres
+WHERE genres_name = 'Adventure') A LEFT JOIN movieGenresRelation B
+ON A.genres_id = B.genres_id) C LEFT JOIN meta D
+ON C.movie_id = D.id
+ORDER BY vote_average DESC
+LIMIT 50
+)
 SELECT E.*, F.links AS poster_link
 FROM
 (SELECT movie_info.*, score AS rating

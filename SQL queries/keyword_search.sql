@@ -13,10 +13,13 @@ FROM
 (SELECT movie_info.*, score AS rating
 FROM movie_info
          LEFT JOIN(SELECT movieId, (mean - 1.96 * std) AS score
-                   FROM (SELECT movieId, AVG(rating) AS mean, STD(rating) AS std
-                         FROM ratings
-                         WHERE movieId IN (SELECT movie_id AS movidId FROM movie_info)
-                         GROUP BY movieId) AS C) D
+                   FROM (SELECT movie_id AS movieId, AVG(rating) as mean, STD(rating) as std
+                        FROM
+                        (SELECT movie_id, rating
+                        FROM movie_info LEFT JOIN ratings
+                        ON movie_id = movieId) G
+                        GROUP BY movie_id
+                            ) AS C) D
                   ON movie_info.movie_id = D.movieId) E LEFT JOIN imageLink F
 ON E.imdb_id = F.IMDBid
 ORDER BY rating DESC, vote_average DESC;
