@@ -89,21 +89,21 @@ class MovieSearchPage extends React.Component {
         this.handleKeywordQueryChange = this.handleKeywordQueryChange.bind(this)
         this.handleTypeQueryChange = this.handleTypeQueryChange.bind(this)
         this.handleSimilarTypeQueryChange = this.handleSimilarTypeQueryChange.bind(this)
-        this.getGoHandsMovies = this.getGoHandsMovies.bind(this)
+        this.getHistoryMovies = this.getHistoryMovies.bind(this)
         this.getActionMovies = this.getActionMovies.bind(this)
-        this.getAniplexMovies = this.getAniplexMovies.bind(this)
+        this.getFamilyMovies = this.getFamilyMovies.bind(this)
         this.getComedyMovies = this.getComedyMovies.bind(this)
         this.getCrimeMovies = this.getCrimeMovies.bind(this)
         this.getScienceMovies = this.getScienceMovies.bind(this)
         this.getThrillerMovies = this.getThrillerMovies.bind(this)
         this.getWesternMovies = this.getWesternMovies.bind(this)
         this.getDocumentaryMovies = this.getDocumentaryMovies.bind(this)
-        this.getGoHandsMovies = this.getGoHandsMovies.bind(this)
+        this.getMusicMovies = this.getMusicMovies.bind(this)
 
     }
 
     updateTypeSearchResults(type) {
-        getKeywordSearch(type.name).then(res => {
+        getTypeSearch(type.name).then(res => {
             this.setState({movieResults: res['results']})
         })
     }
@@ -153,15 +153,15 @@ class MovieSearchPage extends React.Component {
     }
 
     getScienceMovies() {
-        this.updateKeywordSearchResults({'name': 'Science Fiction'})
+        this.updateTypeSearchResults({'name': 'Science Fiction'})
     }
 
-    getAniplexMovies() {
-        this.updateKeywordSearchResults({'name': 'Aniplex'})
+    getMusicMovies() {
+        this.updateTypeSearchResults({'name': 'Music'})
     }
 
-    getGoHandsMovies() {
-        this.updateKeywordSearchResults({'name':'GoHands'})
+    getFamilyMovies() {
+        this.updateTypeSearchResults({'name':'Family'})
     }
 
 
@@ -190,40 +190,46 @@ class MovieSearchPage extends React.Component {
             <div>
                 <Form style={{width: '80vw', margin: '0 auto', marginTop: '5vh'}}>
                     <Row>
-                        <Col flex={1}><FormGroup style={{width: '55vw', margin: '0 auto'}}>
-                            <label>Type keyword to search</label>
-                            <FormInput placeholder="Keyword" value={this.state.keywordQuery}
+                        <Col flex={2}><FormGroup style={{width: '55vw', margin: '0 auto'}}>
+                            <FormInput placeholder="Type a keyword to search" value={this.state.keywordQuery}
                                        onChange={this.handleKeywordQueryChange}/>
                         </FormGroup></Col>
-                        <Col flex={1}><FormGroup style={{width: '10vw'}}>
-                            <Button style={{marginTop: '4vh'}} onClick={this.updateKeywordSearchResults}>Search</Button>
+                        <Col flex={2}><FormGroup style={{width: '10vw'}}>
+                            <Button style={{marginTop: '0vh'}} onClick={this.updateKeywordSearchResults}>Search</Button>
                         </FormGroup></Col>
                     </Row>
                     <br>
                     </br>
-                    <Row>
-                    <Col flex={2} style={{ textAlign: 'left' }}>
-                            <label>Search By Movie Type</label>
-                    </Col>
-                    </Row>
-                    <Row>
-                    <ButtonGroup>
-                    <Button  onClick={this.getActionMovies} theme="secondary" outline theme="success" style={{ marginLeft: "auto" }}> Action </Button>
-                    <Button onClick={this.getComedyMovies} theme="secondary" outline theme="success"> Comedy </Button>
-                    <Button onClick={this.getHistoryMovies} theme="secondary" outline theme="success"> History </Button>
-                    <Button onClick={this.getThrillerMovies} theme="secondary" outline theme="success"> Thriller </Button>         
-                    </ButtonGroup>
-                    </Row>
-                    <ButtonGroup>
-                    <Button onClick={this.getCrimeMovies} theme="secondary" outline theme="success"> Crime </Button>
-                    <Button onClick={this.getWesternMovies} theme="secondary" outline theme="success"> Western </Button>
-                    <Button onClick={this.getDocumentaryMovies} theme="secondary" outline theme="success"> Documentary </Button>
-                    <Button onClick={this.getScienceMovies} theme="secondary" outline theme="success"> Science Fiction </Button>
-                    <Button onClick={this.getAniplexMovies} theme="secondary" outline theme="success"> Aniplex </Button>
-                    <Button onClick={this.getGoHandsMovies} theme="secondary" outline theme="success"> GoHands </Button>
-                    </ButtonGroup>
-                    <br></br>
                 </Form>
+
+                {
+                    <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
+                        Search By Type
+                    </div>
+                }
+
+                {
+                    <div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}>
+                                        <ButtonGroup>
+                                        <Button  onClick={this.getActionMovies} theme="secondary" outline theme="success" style={{ margin: "auto" }}> Action </Button>
+                                        <Button onClick={this.getComedyMovies} theme="secondary" outline theme="success"> Comedy </Button>
+                                        <Button onClick={this.getHistoryMovies} theme="secondary" outline theme="success"> History </Button>
+                                        <Button onClick={this.getThrillerMovies} theme="secondary" outline theme="success"> Thriller </Button>         
+                                        </ButtonGroup>           
+                    </div>
+                }
+
+                {<div style={{display: 'flex',  justifyContent:'center', alignItems:'center'}}> 
+                                        <ButtonGroup>
+                                        <Button onClick={this.getCrimeMovies} theme="secondary" outline theme="success"> Crime </Button>
+                                        <Button onClick={this.getWesternMovies} theme="secondary" outline theme="success"> Western </Button>
+                                        <Button onClick={this.getDocumentaryMovies} theme="secondary" outline theme="success"> Documentary </Button>
+                                        <Button onClick={this.getScienceMovies} theme="secondary" outline theme="success"> Science </Button>
+                                        <Button onClick={this.getFamilyMovies} theme="secondary" outline theme="success"> Family </Button>
+                                        <Button onClick={this.getMusicMovies} theme="secondary" outline theme="success"> Music </Button>
+                                        </ButtonGroup>  
+                </div>
+                }
                 
 
                 <Divider/>
@@ -249,13 +255,19 @@ class MovieSearchPage extends React.Component {
                                 </Row>
                                 <Row gutter='30' align='middle' justify='left'>
                                 <Col>
+                                <h6> Basic Info </h6>
+                                </Col>
+                                </Row>
+
+                                <Row gutter='30' align='middle' justify='left'>
+                                <Col>
                                 Status: {this.state.selectedMovieDetails.status}
                                 </Col>
                                 </Row>
 
                                 <Row gutter='30' align='middle' justify='left'>
                                 <Col>
-                                Length in minutes: {this.state.selectedMovieDetails.runtime}
+                                Movie Length:   {this.state.selectedMovieDetails.runtime} min
                                 </Col>
                                 </Row>
 
@@ -270,6 +282,13 @@ class MovieSearchPage extends React.Component {
                                 Release Date: {this.state.selectedMovieDetails.release_date}
                                 </Col>
                                 </Row>
+
+                                <Row>
+                                <Col>
+                                Production Companies: {this.state.selectedMovieDetails.production_companies}
+                                </Col>
+                                </Row>
+
                                 <br>
                                 </br>
                                 <Row>
@@ -284,6 +303,14 @@ class MovieSearchPage extends React.Component {
                             <img src={this.state.selectedMovieDetails.poster_link} style={{height:'40vh'}}/>
                             </Col>
                         </Row>
+
+                        <Row>
+                                <Col>
+                                <h6>Overview</h6>
+                                {this.state.selectedMovieDetails.overview}
+                                </Col>
+                        </Row>
+
                         </CardBody>
 
                     </Card>
