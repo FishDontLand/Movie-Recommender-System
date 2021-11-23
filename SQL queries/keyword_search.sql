@@ -1,12 +1,13 @@
 USE test;
 
-WITH movie_info AS (SELECT A.movie_id, B.title, B.release_date, B.vote_average, B.imdb_id
+WITH movie_info AS (SELECT A.movie_id, B.title, B.release_date, B.vote_average, B.imdb_id,
+                           B.overview, B.runtime, B.status
 FROM
 (SELECT DISTINCT movie_id
 FROM movieKeywords
 WHERE movie_id IN (SELECT DISTINCT keyword_id
                   FROM keywords
-                  WHERE UPPER(keyword_name) IN (UPPER('paris'), UPPER('holiday'), UPPER('germany')))) A LEFT JOIN meta B
+                  WHERE UPPER(keyword_name) LIKE '%LOVE%')) A LEFT JOIN meta B
 ON A.movie_id = B.id)
 SELECT E.*, F.links AS poster_link
 FROM
