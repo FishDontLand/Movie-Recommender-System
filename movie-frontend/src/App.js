@@ -10,7 +10,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Home from "./components/Home";
 import AppHeader from "./components/AppHeader";
-import PlayersPage from "./components/PlayersPage";
+import MovieSearchPage from "./components/MovieSearchPage";
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(undefined);
@@ -90,6 +90,15 @@ const App = () => {
                 </button>
               </Link>
             </li>
+
+            <li className="nav-item">
+              <Link to={"/movieSearchPage"} className="nav-link">
+                <button type="button" className="btn btn-primary">
+                  Search
+                </button>
+              </Link>
+            </li>
+
           </div>
         )}
       </nav>
@@ -99,8 +108,8 @@ const App = () => {
           <Route exact path={["/", "/home"]} component={Home} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
-          <Route exact path="/movieSearchPage" component={PlayersPage}/>
-          <Route path="/myFavorite" component={PlayersPage}/>
+          <Route exact path="/movieSearchPage" component={MovieSearchPage}/>
+          <Route path="/myFavorite" component={MovieSearchPage}/>
         </Switch>
       </div>
     </div>
