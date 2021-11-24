@@ -28,3 +28,25 @@ WHERE '1995'<year(m.release_date)<'2021'
       AND 1000000000<m.revenue<2000000000
       AND 6.3<m.vote_average<9.5
 ;
+
+
+
+
+
+-- new
+select distinct m.title as MovieTitle,
+       m.release_date as Date,
+       pc.production_countries_name as Country,
+       sl.spoken_languages_name as Language,
+       g.genres_name as Genres,
+       m.vote_average as Rate,
+       m.revenue,
+       m.revenue-m.budget as Profit
+from movieMeta m left join movieInfo mi on m.id = mi.movie_id
+                 left join genres g on mi.genres_id = g.genres_id
+                 left join productionCountries as pc on mi.production_country_abbr = pc.production_country_abbr
+                 left join spokenLanguages as sl on mi.spoken_languages_abbr = sl.spoken_languages_abbr
+WHERE 1000000000<m.revenue<2000000000
+      AND '1995'<year(m.release_date )<'2021'
+      AND 6.3<m.vote_average<9.5
+;
