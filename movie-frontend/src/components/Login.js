@@ -40,12 +40,12 @@ const Login = (props) => {
     setMessage("");
     setLoading(true);
 
-    form.current.validateAll();
+    // form.current.validateAll();
 
     if (checkBtn.current.context._errors.length === 0) {
       AuthService.login(username, password).then(
         () => {
-          props.history.push("/service");
+          props.history.push("/home");
           window.location.reload();
         },
         (error) => {

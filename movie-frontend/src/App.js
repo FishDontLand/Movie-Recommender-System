@@ -11,6 +11,7 @@ import Register from "./components/Register";
 import Home from "./components/Home";
 import AppHeader from "./components/AppHeader";
 import PlayersPage from "./components/PlayersPage";
+import MovieSearchPage from "./components/MovieSearchPage";
 
 const App = () => {
   const [currentUser, setCurrentUser] = useState(undefined);
@@ -44,21 +45,22 @@ const App = () => {
 
           {currentUser && (
             <li className="nav-item">
-              <Link to={"/service"} className="nav-link">
+              <Link to={"/movieSearchPage"} className="nav-link">
                 <button type="button" className="btn btn-primary">
-                  Service
+                  movieSearchPage
                 </button>
               </Link>
             </li>
+
           )}
         </div>
 
         {currentUser ? (
           <div className="navbar-nav justify-content-end">
             <li className="nav-item">
-              <Link to={"/profile"}>
+              <Link to={"/myFavorite"}>
                 <h5 id="welcomeMessage" className="nav-link">
-                  Welcome, {currentUser.username}!
+                  Welcome, {currentUser.displayName}, check out your fav here!
                 </h5>
               </Link>
             </li>
@@ -78,7 +80,8 @@ const App = () => {
             <li className="nav-item">
               <Link to={"/register"} className="nav-link">
                 <button type="button" className="btn btn-primary">
-                  Get Started
+                  Register
+
                 </button>
               </Link>
             </li>
@@ -99,8 +102,8 @@ const App = () => {
           <Route exact path={["/", "/home"]} component={Home} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
-          <Route exact path="/movieSearchPage" component={PlayersPage}/>
-          <Route path="/myFavorite" component={PlayersPage}/>
+          <Route exact path="/movieSearchPage" component={MovieSearchPage}/>
+          <Route path="/myFavorite" component={MovieSearchPage}/>
         </Switch>
       </div>
     </div>
